@@ -21,6 +21,18 @@ style: 'mapbox://styles/mapbox/streets-v11', // style URL
 center: [-74.5, 40], // starting position [lng, lat]
 zoom: 9 // starting zoom
 });
+var currentLocation = [-73.5, 45.5];
+
+map.on('load', function () {
+	map.setCenter(currentLocation);
+
+	var droneOne = new mapboxgl.Marker()
+	.setLngLat(currentLocation)
+	.addTo(map);
+	
+});
+
+
 </script>
  
 </body>
