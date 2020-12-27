@@ -1,6 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Main menu</title>
+<script src="http.js"></script>
 <nav>
     <ul>
       <li><a href="map.html">2D Map</a></li>
       <li><a href="3dmap.html">3D MAP</a></li>
     </ul>
   </nav>
+</head>
+<body>
+<script>
+    var credentials = { // CREDENTIALS HERE
+        "username": "testuser",
+        "password": "testpass"
+    }
+    var url = 'http://192.168.0.135:8000'
+
+    var client = new HttpClient();
+    client.login(credentials,url,function(response){
+        // idk
+    });
+    //client.getMission(url,function(response){
+        // idk
+    //});
+</script>
+</body>
+</html>
