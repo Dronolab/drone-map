@@ -1,10 +1,11 @@
-const { SSL_OP_EPHEMERAL_RSA } = require('constants')
 const https = require('http')
+const express = require('express')
+const app = express()
+const serverPort = 8080
 
 const loginData = JSON.stringify({'username': 'testuser','password': 'testpass'})
 const ip = '192.168.1.42'
 const port = 8000
-
 const loginOptions = {
   hostname: ip,
   port: port,
@@ -18,7 +19,7 @@ const loginOptions = {
 
 const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
 
-// TODO: make sure login is completed before asking for information
+/* HTTP client to make request to the interop server */
 class HttpClient {
   ip
   port
@@ -27,6 +28,7 @@ class HttpClient {
   data
   cookie
   logged = false
+  // Constructors logs the client
   constructor(ip,port,loginOptions,creds){
     this.ip = ip
     this.port = port
@@ -53,7 +55,7 @@ class HttpClient {
     req.write(creds);
     req.end();
   }
-
+  // gets team information, waits first for login confirmation
   async getInformation(){
     while(!this.logged){
       await sleep(500)
@@ -71,6 +73,19 @@ class HttpClient {
 }
 
 var client = new HttpClient(ip,port,loginOptions,loginData);
+
+// SERVER
+app.get('/api/teams', (req, res) => {
+  client.getInformation()
+  res.send(client.data)
+})
+
+app.listen(serverPort, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
+
+
+// MAIN
 client.getInformation()
 
 
