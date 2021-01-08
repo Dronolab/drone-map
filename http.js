@@ -2,9 +2,8 @@
     Created by Emile Normand
 
     Note:
-    Cookies are sent by the interop server with no SameSite values, which mean they default to 'lax' on most browser. This 
-    means the cookie cannot be received by this website unless the default behavior of the browser is changed.
-    
+    Cookies sent by interop have the SameSite=Lax value.
+
 */
 
 var HttpClient = function() {
@@ -29,7 +28,7 @@ var HttpClient = function() {
         anHttpRequest.send(JSON.stringify(credentials));
     }
 
-    this.getTeams = function(aCallback){
+    this.getTeams = function(url,aCallback){
         var anHttpRequest = new XMLHttpRequest();
         anHttpRequest.onreadystatechange = function() { 
             if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200){
@@ -39,7 +38,7 @@ var HttpClient = function() {
                 aCallback(anHttpRequest.status);
             }
         }
-        anHttpRequest.open( "GET", 'http://192.168.0.135:8000/api/teams', true );            
+        anHttpRequest.open( "GET", url.concat('/api/teams'), true );            
         anHttpRequest.send( null );
     }
 
