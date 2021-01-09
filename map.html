@@ -5,6 +5,7 @@
 <title>Display a map</title>
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.js"></script>
+<script src="http.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.css" rel="stylesheet" />
 <style>
 	body { margin: 0; padding: 0; }
@@ -14,24 +15,75 @@
 <body>
 <div id="map"></div>
 <script>
+	var url = 'http://127.0.0.1:8080'
 	mapboxgl.accessToken = 'pk.eyJ1IjoiZW1pbGVub3JtYW5kIiwiYSI6ImNrNm1zNWgxODByM3Mza3FwY3RveG42cW0ifQ.4nth1AhlVKy9fzt3ZnXWfA';
-var map = new mapboxgl.Map({
-container: 'map', // container id
-style: 'mapbox://styles/mapbox/streets-v11', // style URL
-center: [-74.5, 40], // starting position [lng, lat]
-zoom: 9 // starting zoom
-});
-var currentLocation = [-73.5, 45.5];
+	var map = new mapboxgl.Map({
+	container: 'map', // container id
+	style: 'mapbox://styles/mapbox/streets-v11', // style URL
+	center: [-74.5, 40], // starting position [lng, lat]
+	zoom: 9 // starting zoom
+	});
+	var currentLocation = [-73.5, 45.5];
 
-map.on('load', function () {
-	map.setCenter(currentLocation);
+	var client = new HttpClient();
 
-	var droneOne = new mapboxgl.Marker()
-	.setLngLat(currentLocation)
-	.addTo(map);
+	/* TEST */
+	client.startTest(url,function(response){
+		console.log(response)
+	})
 	
-});
+	map.on('load', function () {
+		window.setInterval(function () {
+			client.getTeams(url,function(response){
+				// retrieve the JSON from the response
+				var json = JSON.parse(response)[0];
+				// update the drone symbol's location on the map
+				if(json.telemetry){
+					map.getSource('drone').setData({
+					"type": "Feature",
+					"type": "Feature",
+					"properties": { "name": "Drone" },
+					"geometry": {
+						"type": "Point",
+						"coordinates": [ json.telemetry.latitude, json.telemetry.longitude]
+						}
+					});
+				}
+				
+	
+				// fly the map to the drone's current location
+				map.flyTo({
+				center: [ json.telemetry.latitude, json.telemetry.longitude],
+				speed: 0.5
+				}); 
+			});
+				
+	}, 1000);
+	
+	
 
+		map.addSource('drone', { type: 'geojson', data: {
+			"type": "Feature",
+			"properties": {},
+			"geometry": {
+				"type": "Point",
+				"coordinates": [
+					-76.53063297271729,
+					39.18174077994108
+					]
+				}
+			} 
+		});
+
+		map.addLayer({
+			'id': 'drone',
+			'type': 'symbol',
+			'source': 'drone',
+			'layout': {
+				'icon-image': 'rocket-15'
+				}
+			});
+	});
 
 </script>
  

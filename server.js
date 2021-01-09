@@ -1,6 +1,8 @@
 const https = require('http')
 const express = require('express')
+const cors = require('cors')
 const app = express()
+app.use(cors())
 const serverPort = 8080
 
 const loginData = JSON.stringify({'username': 'testuser','password': 'testpass'})
@@ -34,7 +36,7 @@ class HttpClient {
     this.port = port
     this.loginOptions = loginOptions
     
-    const req = https.request(this.loginOptions, (function(res) { // WRONG THIS
+    const req = https.request(this.loginOptions, (function(res) { 
       console.log(`statusCode: ${res.statusCode}`)
       console.log(res.headers['set-cookie'])
       this.cookie = res.headers['set-cookie']
@@ -70,23 +72,73 @@ class HttpClient {
       req.end();
   }
 
+  publishTelemetry(telemetryData){
+    var testOptions = {
+      hostname: ip,
+      port: port,
+      path: '/api/telemetry',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': telemetryData.length,
+        'Cookie': this.cookie[0]
+      }
+    }
+
+    const req = https.request(testOptions, (function(res) { 
+    console.log(`statusCode: ${res.statusCode}`)
+    res.on('data', d => {
+      process.stdout.write(d);
+    })
+
+  }).bind(this))
+  req.write(telemetryData);
+  req.end();
+  }
+
 }
 
 var client = new HttpClient(ip,port,loginOptions,loginData);
+
+var test = false
 
 // SERVER
 app.get('/api/teams', (req, res) => {
   client.getInformation()
   res.send(client.data)
 })
+var lat = -76.5301
+var lon = 39.1817
+
+app.get('/test/start', (req,res) => {
+  if(!test){
+    test = true
+    setInterval(function(){
+      client.publishTelemetry(JSON.stringify({
+        "latitude": lat,
+        "longitude": lon,
+        "altitude": 50,
+        "heading": 90
+      }))
+      lat +=0.0001
+      lon +=0.0001
+    },1000)
+    res.send('test started')
+  }else{
+    res.send('test already ongoing')
+  }
+})
+
+app.get('/test/end', (req,res) => {
+  if(test){
+    test = false
+  }
+  res.send('test stopped')
+})
 
 app.listen(serverPort, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
-
-
-// MAIN
-client.getInformation()
 
 
 

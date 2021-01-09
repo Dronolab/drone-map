@@ -31,11 +31,13 @@ var HttpClient = function() {
     this.getTeams = function(url,aCallback){
         var anHttpRequest = new XMLHttpRequest();
         anHttpRequest.onreadystatechange = function() { 
-            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200){
+            if (anHttpRequest.readyState === 4) {
+                if (anHttpRequest.status === 200) {
                     aCallback(anHttpRequest.responseText);
-            }
-            else{
-                aCallback(anHttpRequest.status);
+                }else{
+                    console.log("Error", anHttpRequest.statusText);
+                }
+                
             }
         }
         anHttpRequest.open( "GET", url.concat('/api/teams'), true );            
@@ -44,7 +46,6 @@ var HttpClient = function() {
 
     this.getMission = function(aUrl,aCallback){
         var anHttpRequest = new XMLHttpRequest();
-        anHttpRequest.withCredentials = true;
         var completeUrl = aUrl.concat('/api/missions/1')
         anHttpRequest.onreadystatechange = function() { 
             if (anHttpRequest.readyState === 4) {
@@ -57,6 +58,21 @@ var HttpClient = function() {
             }
         }
         anHttpRequest.open( "GET", completeUrl, true );            
+        anHttpRequest.send( null );
+    }
+
+    this.startTest = function(url,callback){
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState === 4) {
+                if (anHttpRequest.status === 200) {
+                    callback(anHttpRequest.responseText);
+                } else {
+                     console.log("Error", anHttpRequest.statusText);
+                }
+            }
+        }
+        anHttpRequest.open( "GET", url.concat('/test/start'), true );            
         anHttpRequest.send( null );
     }
 }
